@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 
 class PaymentProviderController extends Controller
 {
-    public function getCheckOutId($price){
+    public function getCheckOutId(Request $request){
         $url = "https://test.oppwa.com/v1/checkouts";
         $data = "entityId=8a8294174b7ecb28014b9699220015ca" .
-            "&amount=" .$price.
+            "&amount=" .$request->price.
             "&currency=EUR" .
             "&paymentType=DB";
 
@@ -26,6 +26,14 @@ class PaymentProviderController extends Controller
             return curl_error($ch);
         }
         curl_close($ch);
-        return $res=json_decode($responseData,true);
+        $res=json_decode($responseData,true);
+
+        $view = view('ajax.form')->with(['responseData' => $res , 'id' => $request -> offer_id])
+            ->renderSections();
+
+        return response()->json([
+            'status' => true,
+            'content' => $view['main']
+        ]);
     }
 }
